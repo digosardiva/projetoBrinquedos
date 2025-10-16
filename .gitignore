@@ -1,0 +1,8 @@
+# .gitignore (exemplo)
+.venv/
+__pycache__/
+*.pyc
+model_artifacts/
+*.pkl
+*.sqlite
+.env
