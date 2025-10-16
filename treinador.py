@@ -104,7 +104,7 @@ if SAVE_CONF_MATRIX:
     plt.close()
     print(f"✅ Matriz de confusão salva em {fig_path}")
 
-# 9) Salvar modelo e metadata
+# 9) Salvar modelo e metadata 
 joblib.dump(model, MODEL_OUT)
 metadata = {
     "feature_columns": feature_cols,

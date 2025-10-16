@@ -6,3 +6,4 @@ model_artifacts/
 *.pkl
 *.sqlite
 .env
+venv/
