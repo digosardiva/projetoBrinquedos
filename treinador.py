@@ -89,20 +89,71 @@ print("📋 Relatório de classificação:")
 print(classification_report(y_test, y_pred, zero_division=0))
 
 # Matriz de confusão
+# 8) Avaliar resultados e gerar dashboards
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+print(f"\n🎯 Acurácia: {acc:.4f}\n")
+print("📋 Relatório de classificação:")
+print(classification_report(y_test, y_pred, zero_division=0))
+
 cm = confusion_matrix(y_test, y_pred)
 print("Matriz de confusão:\n", cm)
 
-if SAVE_CONF_MATRIX:
-    plt.figure(figsize=(5, 4))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-    plt.title("Matriz de Confusão")
-    plt.xlabel("Previsto")
-    plt.ylabel("Real")
+# === Dashboards ===
+print("\n📈 Gerando dashboards de desempenho...")
+
+# --- 1️⃣ Matriz de confusão ---
+plt.figure(figsize=(5, 4))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title("Matriz de Confusão")
+plt.xlabel("Previsto")
+plt.ylabel("Real")
+plt.tight_layout()
+plt.savefig(ARTIFACT_DIR / "dashboard_confusion_matrix.png")
+plt.close()
+
+# --- 2️⃣ Importância das features ---
+feat_imp = pd.Series(model.feature_importances_, index=feature_cols).sort_values(ascending=False)
+plt.figure(figsize=(10, 5))
+sns.barplot(x=feat_imp.values[:10], y=feat_imp.index[:10], palette="viridis")
+plt.title("Top 10 Features Importantes")
+plt.xlabel("Importância")
+plt.ylabel("Feature")
+plt.tight_layout()
+plt.savefig(ARTIFACT_DIR / "dashboard_feature_importance.png")
+plt.close()
+
+# --- 3️⃣ Distribuição do target original ---
+plt.figure(figsize=(4, 4))
+sns.countplot(x='label', data=df, palette="coolwarm")
+plt.title("Distribuição das Classes (label)")
+plt.xlabel("Classe")
+plt.ylabel("Contagem")
+plt.tight_layout()
+plt.savefig(ARTIFACT_DIR / "dashboard_target_distribution.png")
+plt.close()
+
+# --- 4️⃣ Correlação entre medidas principais ---
+plt.figure(figsize=(8, 6))
+sns.heatmap(df[['c_brin', 'l_brin', 'a_brin', 'c_gar', 'l_gar', 'a_gar']].corr(), 
+            annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Correlação entre Dimensões")
+plt.tight_layout()
+plt.savefig(ARTIFACT_DIR / "dashboard_correlacao_dimensoes.png")
+plt.close()
+
+# --- 5️⃣ Comparativo: área do brinquedo x garagem ---
+if 'area_brin' in df.columns and 'area_gar' in df.columns:
+    plt.figure(figsize=(6, 5))
+    sns.scatterplot(data=df, x='area_brin', y='area_gar', hue='label', palette="viridis", alpha=0.7)
+    plt.title("Relação Área Brinquedo x Garagem")
+    plt.xlabel("Área Brinquedo")
+    plt.ylabel("Área Garagem")
     plt.tight_layout()
-    fig_path = ARTIFACT_DIR / "confusion_matrix.png"
-    plt.savefig(fig_path)
+    plt.savefig(ARTIFACT_DIR / "dashboard_area_relacao.png")
     plt.close()
-    print(f"✅ Matriz de confusão salva em {fig_path}")
+
+print("✅ Dashboards gerados e salvos em", ARTIFACT_DIR)
 
 # 9) Salvar modelo e metadata 
 joblib.dump(model, MODEL_OUT)
